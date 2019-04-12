@@ -5,10 +5,16 @@
 </head>
 <body>
   <h1>Birdboard</h1>
-  <ul>
-    @foreach ($projects as $project)
-      <li>{{ $project->title }}</li>
-    @endforeach
-  </ul>
+  @forelse ($projects as $project)
+    <ul>
+      <li>
+        <a href="{{ route('projects.show', $project) }}">
+          {{ $project->title }}
+        </a>
+      </li>
+    </ul>
+  @empty
+    <p>No projects yet.</p>
+  @endforelse
 </body>
 </html>

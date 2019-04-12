@@ -20,11 +20,13 @@ class ProjectsTest extends TestCase
             'description' => $this->faker->paragraph,
         ];
 
-        $this->post('/projects', $attributes)->assertRedirect('/projects');
+        // $this->post(route('projects.store', $attributes))->assertRedirect(route('projects/index'));
+        $this->post(route('projects.store', $attributes))->assertRedirect(route('projects.index'));
+
 
         $this->assertDatabaseHas('projects', $attributes);
 
-        $this->get('/projects')->assertSee($attributes['title']);
+        $this->get(route('projects.index'))->assertSee($attributes['title']);
     }
 
     /** @test */
@@ -32,7 +34,7 @@ class ProjectsTest extends TestCase
     {
         $attributes = factory('App\Project')->raw(['title' => '']);
 
-        $this->post('/projects', $attributes)->assertSessionHasErrors('title');
+        $this->post(route('projects.store'), $attributes)->assertSessionHasErrors('title');
     }
 
     /** @test */
@@ -40,6 +42,18 @@ class ProjectsTest extends TestCase
     {
         $attributes = factory('App\Project')->raw(['description' => '']);
 
-        $this->post('/projects', $attributes)->assertSessionHasErrors('description');
+        $this->post(route('projects.store'), $attributes)->assertSessionHasErrors('description');
+    }
+
+    /** @test */
+    public function a_user_can_view_a_project()
+    {
+        $this->withoutExceptionHandling();
+
+        $project = factory('App\Project')->create();
+
+        $this->get(route('projects.show', $project))
+            ->assertSee($project->title)
+            ->assertSee($project->description);
     }
 }
