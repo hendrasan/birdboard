@@ -31,15 +31,53 @@ class ProjectsTest extends TestCase
     }
 
     /** @test */
+    public function guests_cannot_create_projects()
+    {
+        // $this->withoutExceptionHandling();
+
+        $attributes = factory('App\Project')->raw();
+
+        $this->post(route('projects.store'), $attributes)->assertRedirect('login');
+    }
+
+    /** @test */
+    public function guests_may_not_view_projects()
+    {
+        $this->get(route('projects.index'))->assertRedirect('login');
+    }
+
+    /** @test */
+    public function guests_may_not_view_a_project()
+    {
+        $project = factory('App\Project')->create();
+
+        $this->get(route('projects.show', $project))->assertRedirect('login');
+    }
+
+    /** @test */
     public function a_user_can_view_a_project()
     {
-        $this->withoutExceptionHandling();
+        $this->be(factory('App\User')->create());
 
-        $project = factory('App\Project')->create();
+        // $this->withoutExceptionHandling();
+
+        $project = factory('App\Project')->create(['user_id' => auth()->id()]);
 
         $this->get(route('projects.show', $project))
             ->assertSee($project->title)
             ->assertSee($project->description);
+    }
+
+    /** @test */
+    public function a_user_cannot_view_other_users_projects()
+    {
+        $this->be(factory('App\User')->create());
+
+        // $this->withoutExceptionHandling();
+
+        $project = factory('App\Project')->create();
+
+        $this->get(route('projects.show', $project))->assertStatus(403);
     }
 
     /** @test */
@@ -60,16 +98,6 @@ class ProjectsTest extends TestCase
         $attributes = factory('App\Project')->raw(['description' => '']);
 
         $this->post(route('projects.store'), $attributes)->assertSessionHasErrors('description');
-    }
-
-    /** @test */
-    public function a_project_requires_an_owner()
-    {
-        // $this->withoutExceptionHandling();
-
-        $attributes = factory('App\Project')->raw();
-
-        $this->post(route('projects.store'), $attributes)->assertRedirect('login');
     }
 
 }

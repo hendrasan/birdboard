@@ -10,14 +10,17 @@ class ProjectsController extends Controller
 {
     public function index()
     {
-        $projects = Project::all();
+        // $projects = Project::all();
+        $projects = auth()->user()->projects;
 
         return view('projects.index', compact('projects'));
     }
 
     public function show(Project $project)
     {
-        // $project = Project::findOrFail($project);
+        if (auth()->id() !== (int) $project->user_id) {
+            abort(403);
+        }
 
         return view('projects.show', compact('project'));
     }
